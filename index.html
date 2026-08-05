@@ -81,11 +81,6 @@
     border: 1px solid #555; border-radius: 8px; background: #fff; color: #111; margin-bottom: 10px;
   }
   .panel .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .panel textarea {
-    width: 100%; padding: 10px; font: inherit; font-size: 14px; line-height: 1.5;
-    border: 1px solid #555; border-radius: 8px; background: #fff; color: #111;
-    margin-bottom: 10px; resize: vertical;
-  }
   .panel button, #adminBar button {
     padding: 10px 14px; font: inherit; font-size: 15px; cursor: pointer;
     border: 0; border-radius: 8px; background: var(--yellow); color: #1b1b1b; font-weight: 700;
@@ -163,20 +158,9 @@
 
 <div id="adminBar">
   <button type="button" id="addBtn">+ زیادکردنی شوێن</button>
-  <button type="button" id="sendBtn">ناردنی گۆڕانکاریەکان</button>
   <span class="grow"></span>
   <button type="button" class="ghost" id="dlBtn">داگرتنی فایل</button>
   <button type="button" class="ghost" id="outBtn">دەرچوون</button>
-</div>
-
-<div class="panel" id="reportPanel">
-  <label for="reportText">ئەم دەقە کۆپی بکە و بۆ بەلال بینێرە</label>
-  <textarea id="reportText" rows="8" readonly></textarea>
-  <div class="row">
-    <button type="button" id="reportCopy">کۆپیکردن</button>
-    <button type="button" class="ghost" id="reportClose">داخستن</button>
-  </div>
-  <div class="msg" id="reportMsg"></div>
 </div>
 
 <div class="search">
@@ -315,7 +299,6 @@
   function $(id) { return document.getElementById(id); }
   var list = $('rows'), items = list.getElementsByTagName('li');
   var dirty = false, live = false;
-  var before = new Map(), removed = [];   // reassigned when a draft is restored
 
   /* A Kurdish keyboard makes "8,000" awkward, and may produce Arabic-Indic
      digits. Accept anything, normalise to Western digits, add the commas. */
@@ -354,10 +337,6 @@
       .toLowerCase()
       .replace(/\s+/g, ' ')
       .trim();
-  }
-
-  for (var i0 = 0; i0 < items.length; i0++) {
-    before.set(items[i0], { n: txt(nameEl(items[i0])), p: txt(priceEl(items[i0])) });
   }
 
   /* ---------- search: works for customers, no login ---------- */
@@ -415,7 +394,6 @@
       b.type = 'button'; b.className = 'del'; b.textContent = '×';
       b.addEventListener('click', function () {
         if (!confirm('ئەم شوێنە بسڕدرێتەوە؟\n' + txt(nameEl(li)))) return;
-        if (before.has(li)) removed.push(before.get(li));
         li.remove(); dirty = true; queueDraft(); applyFilter();
       });
       li.appendChild(b);
@@ -507,7 +485,7 @@
   }
   function saveDraft() {
     if (!live || !dirty) return;
-    try { localStorage.setItem(DKEY, JSON.stringify({ rows: snapshot(), removed: removed })); } catch (err) {}
+    try { localStorage.setItem(DKEY, JSON.stringify({ rows: snapshot() })); } catch (err) {}
   }
   function dropDraft() { try { localStorage.removeItem(DKEY); } catch (err) {} }
   function restoreDraft() {
@@ -520,7 +498,6 @@
     if (JSON.stringify(d.rows) === JSON.stringify(snapshot())) { dropDraft(); return; }
     if (!confirm('گۆڕانکاری پاشەکەوتکراو هەیە. بیگەڕێنمەوە؟')) { dropDraft(); return; }
     while (list.firstChild) list.removeChild(list.firstChild);
-    before = new Map();
     for (var i = 0; i < d.rows.length; i++) {
       var li = document.createElement('li');
       li.innerHTML = '<span class="n"></span><span class="dots"></span><span class="p"></span>';
@@ -529,7 +506,6 @@
       list.appendChild(li);
       decorate(li);
     }
-    removed = d.removed || [];
     dirty = true;
     applyFilter();
   }
@@ -560,54 +536,6 @@
   }
 
   /* ---------- what changed ---------- */
-  var RLM = '\u200F';   // stops a Latin fragment in the name flipping the numbers
-  function changes() {
-    var priced = [], renamed = [], added = [];
-    for (var i = 0; i < items.length; i++) {
-      var li = items[i], n = txt(nameEl(li)), p = txt(priceEl(li));
-      if (before.has(li)) {
-        var o = before.get(li);
-        if (o.n !== n) renamed.push(RLM + o.n + ' ← ' + RLM + n);
-        if (o.p !== p) priced.push(n + ': ' + RLM + o.p + ' ← ' + RLM + p);
-      } else {
-        added.push(n + ' — ' + RLM + p);
-      }
-    }
-    return { priced: priced, renamed: renamed, added: added, removed: removed };
-  }
-  function report() {
-    var c = changes(), out = [];
-    if (c.priced.length) out.push('نرخ گۆڕدرا:\n• ' + c.priced.join('\n• '));
-    if (c.renamed.length) out.push('ناو گۆڕدرا:\n• ' + c.renamed.join('\n• '));
-    if (c.added.length) out.push('زیادکرا:\n• ' + c.added.join('\n• '));
-    if (c.removed.length) out.push('سڕدرایەوە:\n• ' + c.removed.map(function (r) { return r.n + ' (' + RLM + r.p + ')'; }).join('\n• '));
-    return out.length ? 'گۆڕانکاری لە نرخەکانی تەکسی سلاڤا:\n\n' + out.join('\n\n') : '';
-  }
-  $('sendBtn').addEventListener('click', function () {
-    if (blocked()) return;
-    var msg = report();
-    if (!msg) { alert('هیچ گۆڕانکاریەک نییە.'); return; }
-    var win = window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-    if (!win) {                       // popup blocked — fall back to copy
-      var ta = $('reportText');
-      ta.value = msg;
-      $('reportPanel').classList.add('open');
-      ta.focus(); ta.select();
-    }
-  });
-
-  $('reportClose').addEventListener('click', function () {
-    $('reportPanel').classList.remove('open'); $('reportMsg').textContent = '';
-  });
-  $('reportCopy').addEventListener('click', function () {
-    var ta = $('reportText');
-    ta.focus(); ta.select();
-    var done = false;
-    try { done = document.execCommand('copy'); } catch (err) { done = false; }
-    $('reportMsg').className = done ? 'msg good' : 'msg bad';
-    $('reportMsg').textContent = done ? 'کۆپی کرا ✓' : 'بە دەست کۆپی بکە';
-  });
-
   /* ---------- the whole page, cleaned, as a file ---------- */
   function buildFile() {
     var c = document.documentElement.cloneNode(true), els, i;
@@ -628,8 +556,6 @@
     for (i = 0; i < els.length; i++) els[i].removeAttribute('class');
     var n;
     if ((n = c.querySelector('#loginErr'))) n.textContent = '';
-    if ((n = c.querySelector('#reportMsg'))) n.textContent = '';
-    if ((n = c.querySelector('#reportText'))) { n.textContent = ''; n.value = ''; }
     if ((n = c.querySelector('#count'))) n.textContent = '';
     if ((n = c.querySelector('#empty'))) n.className = 'empty';
     return '<!doctype html>\n' + c.outerHTML + '\n';
