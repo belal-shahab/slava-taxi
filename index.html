@@ -111,6 +111,60 @@
     .notes { background: #1a1a1a; }
     .list .dots { border-bottom-color: #444; }
   }
+
+  /* ---- owner edit mode ---- */
+  header { position: relative; }
+  #adminBtn {
+    position: absolute; top: 12px; right: 10px;
+    background: transparent; color: var(--yellow);
+    border: 1px solid var(--yellow); border-radius: 8px;
+    padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  #adminBtn:active { background: rgba(242,194,48,.2); }
+
+  .panel { display: none; padding: 14px; background: #2a2a2a; color: #eee; }
+  .panel.open { display: block; }
+  .panel label { display: block; font-size: 14px; margin-bottom: 6px; }
+  .panel input {
+    width: 100%; padding: 11px 12px; font: inherit; font-size: 16px;
+    border: 1px solid #555; border-radius: 8px; background: #fff; color: #111;
+    margin-bottom: 10px;
+  }
+  .panel .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .panel button, #adminBar button {
+    padding: 10px 14px; font: inherit; font-size: 15px; cursor: pointer;
+    border: 0; border-radius: 8px; background: var(--yellow); color: #1b1b1b;
+    font-weight: 700;
+  }
+  .panel button.ghost, #adminBar button.ghost {
+    background: transparent; color: #ddd; border: 1px solid #666; font-weight: 400;
+  }
+  .msg { font-size: 14px; margin-top: 8px; min-height: 1.2em; }
+  .msg.bad { color: #ff9b9b; }
+  .msg.good { color: #9bffb0; }
+  .hint { font-size: 12px; color: #bbb; margin: 0 0 10px; line-height: 1.6; }
+  .hint a { color: var(--yellow); }
+
+  #adminBar {
+    display: none; position: sticky; top: 0; z-index: 6;
+    background: #2a2a2a; padding: 10px; gap: 8px; flex-wrap: wrap;
+  }
+  #adminBar.open { display: flex; }
+  #adminBar .grow { flex: 1 1 auto; }
+
+  body.editmode .search { top: 58px; }
+  body.editmode .list li { background: rgba(242,194,48,.07); }
+  body.editmode .list .n, body.editmode .list .p {
+    border-bottom: 1px dashed #b98f00; padding: 2px 4px; min-width: 2em;
+    outline: none;
+  }
+  body.editmode .list .n:focus, body.editmode .list .p:focus {
+    background: #fff7dd; border-bottom-color: #1b1b1b;
+  }
+  .del {
+    border: 0; background: transparent; color: #c00; cursor: pointer;
+    font-size: 20px; line-height: 1; padding: 0 4px; margin-inline-start: 4px;
+  }
 </style>
 </head>
 <body>
@@ -118,7 +172,43 @@
 <header>
   <h1>نرخەکانی تەکسی شاری سلاڤا</h1>
   <p>بۆ گواستنەوەی هاوڵاتیان — هەولێر</p>
+  <button id="adminBtn" type="button">سلاڤا</button>
 </header>
+
+<div class="panel" id="loginPanel">
+  <label for="pw">وشەی نهێنی</label>
+  <input id="pw" type="password" autocomplete="current-password" inputmode="text">
+  <div class="row">
+    <button type="button" id="loginBtn">چونەژورەوە</button>
+    <button type="button" class="ghost" id="loginCancel">پاشگەزبوونەوە</button>
+  </div>
+  <div class="msg" id="loginErr"></div>
+</div>
+
+<div id="adminBar">
+  <button type="button" id="addBtn">+ زیادکردنی شوێن</button>
+  <button type="button" id="pubBtn">بڵاوکردنەوە</button>
+  <span class="grow"></span>
+  <button type="button" class="ghost" id="dlBtn">داگرتنی فایل</button>
+  <button type="button" class="ghost" id="outBtn">دەرچوون</button>
+</div>
+
+<div class="panel" id="tokenPanel">
+  <p class="hint">
+    بۆ بڵاوکردنەوە پێویستە جارێک کلیلی GitHub دابنێیت. لە
+    <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">ئەم لینکە</a>
+    کلیلێک دروست بکە بۆ ڕیپۆی <b>slava-taxi</b> بە مۆڵەتی <b>Contents: Read and write</b>.
+    کلیلەکە تەنها لەسەر ئەم مۆبایلە پاشەکەوت دەبێت.
+  </p>
+  <label for="tok">کلیلی GitHub</label>
+  <input id="tok" type="password" autocomplete="off">
+  <div class="row">
+    <button type="button" id="tokSave">پاشەکەوتکردن و بڵاوکردنەوە</button>
+    <button type="button" class="ghost" id="tokCancel">پاشگەزبوونەوە</button>
+  </div>
+  <div class="msg" id="pubStatus"></div>
+</div>
+
 
 <div class="search">
   <input id="q" type="search" inputmode="search" autocomplete="off"
@@ -248,28 +338,210 @@
 <footer>تەکسی شاری سلاڤا</footer>
 
 <script>
-  var q = document.getElementById('q');
-  var items = document.getElementById('rows').getElementsByTagName('li');
-  var count = document.getElementById('count');
-  var empty = document.getElementById('empty');
+(function () {
+  var REPO = 'belal-shahab/slava-taxi', BRANCH = 'main', FILE = 'index.html';
+  var PW = 'Ballen@123';          // gate only — hides the button from customers
+  var TKEY = 'slava_gh_token';    // GitHub token, kept on this device only
 
+  function $(id) { return document.getElementById(id); }
+  var list = $('rows'), items = list.getElementsByTagName('li');
+  var dirty = false, live = false;
+
+  /* ---------- search (works for customers, no login needed) ---------- */
+  function nameOf(li) { return li.getElementsByClassName('n')[0]; }
   function show(n) {
-    count.textContent = n + ' شوێن';
-    empty.className = n ? 'empty' : 'empty show';
+    $('count').textContent = n + ' شوێن';
+    $('empty').className = n ? 'empty' : 'empty show';
   }
-
-  q.addEventListener('input', function () {
-    var term = q.value.trim();
-    var n = 0;
+  $('q').addEventListener('input', function () {
+    var term = $('q').value.trim(), n = 0;
     for (var i = 0; i < items.length; i++) {
-      var hit = !term || items[i].firstChild.textContent.indexOf(term) !== -1;
+      var hit = !term || nameOf(items[i]).textContent.indexOf(term) !== -1;
       items[i].className = hit ? '' : 'hide';
       if (hit) n++;
     }
     show(n);
   });
-
   show(items.length);
+
+  /* ---------- login ---------- */
+  $('adminBtn').addEventListener('click', function () {
+    if (live) { $('adminBar').classList.toggle('open'); return; }
+    $('loginPanel').classList.toggle('open');
+    if ($('loginPanel').classList.contains('open')) $('pw').focus();
+  });
+  $('loginCancel').addEventListener('click', function () {
+    $('loginPanel').classList.remove('open'); $('pw').value = ''; $('loginErr').textContent = '';
+  });
+  function tryLogin() {
+    if ($('pw').value === PW) {
+      $('pw').value = ''; $('loginErr').textContent = '';
+      $('loginPanel').classList.remove('open');
+      enter();
+    } else {
+      $('loginErr').className = 'msg bad';
+      $('loginErr').textContent = 'وشەی نهێنی هەڵەیە';
+    }
+  }
+  $('loginBtn').addEventListener('click', tryLogin);
+  $('pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin(); });
+
+  /* ---------- edit mode ---------- */
+  function decorate(li) {
+    nameOf(li).setAttribute('contenteditable', 'true');
+    li.getElementsByClassName('p')[0].setAttribute('contenteditable', 'true');
+    if (!li.getElementsByClassName('del')[0]) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'del'; b.textContent = '×';
+      b.addEventListener('click', function () {
+        if (confirm('ئەم شوێنە بسڕدرێتەوە؟\n' + nameOf(li).textContent)) {
+          li.remove(); dirty = true; show(items.length);
+        }
+      });
+      li.appendChild(b);
+    }
+  }
+  function enter() {
+    live = true;
+    document.body.classList.add('editmode');
+    $('adminBar').classList.add('open');
+    for (var i = 0; i < items.length; i++) decorate(items[i]);
+  }
+  function leave() {
+    live = false;
+    document.body.classList.remove('editmode');
+    $('adminBar').classList.remove('open');
+    $('tokenPanel').classList.remove('open');
+    var els = list.querySelectorAll('[contenteditable]');
+    for (var i = 0; i < els.length; i++) els[i].removeAttribute('contenteditable');
+    var dels = list.querySelectorAll('.del');
+    for (var j = 0; j < dels.length; j++) dels[j].remove();
+  }
+  $('outBtn').addEventListener('click', function () {
+    if (dirty && !confirm('گۆڕانکاری بڵاو نەکراوە هەیە. دەرچیت؟')) return;
+    dirty = false; leave();
+  });
+
+  list.addEventListener('input', function () { dirty = true; });
+  /* keep pasted text plain so the saved file stays clean */
+  list.addEventListener('paste', function (e) {
+    if (!live) return;
+    e.preventDefault();
+    var t = (e.clipboardData || window.clipboardData).getData('text').replace(/\s+/g, ' ').trim();
+    document.execCommand('insertText', false, t);
+  });
+
+  $('addBtn').addEventListener('click', function () {
+    var li = document.createElement('li');
+    li.innerHTML = '<span class="n"></span><span class="dots"></span><span class="p"></span>';
+    nameOf(li).textContent = 'ناوی نوێ';
+    li.getElementsByClassName('p')[0].textContent = '0,000';
+    list.appendChild(li);
+    decorate(li);
+    dirty = true; show(items.length);
+    if (li.scrollIntoView) li.scrollIntoView({ block: 'center' });
+    nameOf(li).focus();
+    var sel = document.getSelection();
+    if (sel && sel.selectAllChildren) sel.selectAllChildren(nameOf(li));
+  });
+
+  window.addEventListener('beforeunload', function (e) {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* ---------- build the file to publish ---------- */
+  function buildFile() {
+    var c = document.documentElement.cloneNode(true);
+    var i, els;
+    els = c.querySelectorAll('[contenteditable]');
+    for (i = 0; i < els.length; i++) els[i].removeAttribute('contenteditable');
+    els = c.querySelectorAll('.del');
+    for (i = 0; i < els.length; i++) els[i].remove();
+    els = c.querySelectorAll('li.hide');
+    for (i = 0; i < els.length; i++) els[i].classList.remove('hide');
+    els = c.querySelectorAll('.panel.open, #adminBar.open');
+    for (i = 0; i < els.length; i++) els[i].classList.remove('open');
+    c.querySelector('body').classList.remove('editmode');
+    var n;
+    if ((n = c.querySelector('#loginErr'))) n.textContent = '';
+    if ((n = c.querySelector('#pubStatus'))) n.textContent = '';
+    if ((n = c.querySelector('#count'))) n.textContent = '';
+    if ((n = c.querySelector('#empty'))) n.className = 'empty';
+    return '<!doctype html>\n' + c.outerHTML + '\n';
+  }
+
+  $('dlBtn').addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buildFile()], { type: 'text/html' }));
+    a.download = 'index.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  /* ---------- publish straight to GitHub ---------- */
+  function b64(str) {
+    var bytes = new TextEncoder().encode(str), bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+  function status(txt, cls) {
+    var el = $('pubStatus');
+    el.className = 'msg' + (cls ? ' ' + cls : '');
+    el.textContent = txt;
+  }
+  function api(path, opts, token) {
+    opts = opts || {};
+    opts.headers = Object.assign({
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    }, opts.headers || {});
+    return fetch('https://api.github.com/repos/' + REPO + '/contents/' + path, opts);
+  }
+  function publish(token) {
+    $('tokenPanel').classList.add('open');
+    status('چاوەڕێ بکە…');
+    var body = buildFile();
+    api(FILE + '?ref=' + BRANCH, {}, token).then(function (r) {
+      if (r.status === 401) throw new Error('کلیلەکە هەڵەیە یان بەسەرچووە');
+      if (!r.ok) throw new Error('نەتوانرا فایلەکە بخوێنرێتەوە (' + r.status + ')');
+      return r.json();
+    }).then(function (info) {
+      return api(FILE, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'نوێکردنەوەی نرخەکان',
+          content: b64(body),
+          sha: info.sha,
+          branch: BRANCH
+        })
+      }, token);
+    }).then(function (r) {
+      if (!r.ok) return r.json().then(function (j) {
+        throw new Error(j.message || ('هەڵە ' + r.status));
+      });
+      dirty = false;
+      localStorage.setItem(TKEY, token);
+      status('بڵاوکرایەوە ✓ دوای ١ خولەک لەسەر کارتەکان دەردەکەوێت', 'good');
+    }).catch(function (e) {
+      status(e.message, 'bad');
+    });
+  }
+  $('pubBtn').addEventListener('click', function () {
+    var t = localStorage.getItem(TKEY);
+    if (t) { publish(t); } else { $('tokenPanel').classList.add('open'); $('tok').focus(); }
+  });
+  $('tokSave').addEventListener('click', function () {
+    var t = $('tok').value.trim();
+    if (!t) { status('کلیل بنووسە', 'bad'); return; }
+    $('tok').value = '';
+    publish(t);
+  });
+  $('tokCancel').addEventListener('click', function () {
+    $('tokenPanel').classList.remove('open'); $('tok').value = ''; status('');
+  });
+})();
 </script>
 
 </body>
