@@ -25,77 +25,45 @@
     line-height: 1.4;
   }
 
-  header {
-    background: var(--ink);
-    color: var(--yellow);
-    padding: 16px 14px 14px;
-    text-align: center;
-  }
-  header h1 { margin: 0; font-size: 21px; font-weight: 700; }
+  header { position: relative; background: var(--ink); color: var(--yellow); padding: 16px 14px 14px; text-align: center; }
+  header h1 { margin: 0; font-size: 21px; font-weight: 700; padding: 0 68px; }
   header p { margin: 4px 0 0; font-size: 13px; color: #c9c9c9; }
-
-  .search {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    background: var(--yellow);
-    padding: 10px;
-    border-bottom: 2px solid var(--ink);
+  #adminBtn {
+    position: absolute; top: 12px; right: 10px;
+    background: transparent; color: var(--yellow);
+    border: 1px solid var(--yellow); border-radius: 8px;
+    padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer;
+    user-select: none; -webkit-user-select: none;
+    /* without this, five fast taps become double-tap-to-zoom on a phone */
+    touch-action: manipulation;
   }
+
+  /* the bar is always yellow, so its chrome must not follow the theme */
+  .search { position: sticky; top: 0; z-index: 5; background: var(--yellow); padding: 10px; border-bottom: 2px solid #1b1b1b; }
   .search input {
-    width: 100%;
-    padding: 11px 14px;
-    font: inherit;
-    font-size: 17px;
-    border: 2px solid var(--ink);
-    border-radius: 10px;
-    background: #fff;
-    color: #1b1b1b;
+    width: 100%; padding: 11px 14px; font: inherit; font-size: 17px;
+    border: 2px solid #1b1b1b; border-radius: 10px; background: #fff; color: #1b1b1b;
   }
   .count { margin: 6px 2px 0; font-size: 12px; color: #5a4600; }
 
   /* fare grid — flows DOWN each column, same as the printed card */
   .list {
-    margin: 0;
-    padding: 0 8px;
-    list-style: none;
-    column-width: 210px;
-    column-gap: 14px;
-    column-rule: 1px solid var(--line);
+    margin: 0; padding: 0 8px; list-style: none;
+    column-width: 210px; column-gap: 14px; column-rule: 1px solid var(--line);
   }
   .list li {
-    break-inside: avoid;
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    padding: 9px 4px;
-    border-bottom: 1px solid var(--line);
+    break-inside: avoid; display: flex; align-items: baseline; gap: 6px;
+    padding: 9px 4px; border-bottom: 1px solid var(--line);
   }
   .list .n { flex: 0 1 auto; }
-  .list .dots {
-    flex: 1 1 auto;
-    min-width: 10px;
-    border-bottom: 1px dotted #bbb;
-    transform: translateY(-4px);
-  }
-  .list .p {
-    flex: 0 0 auto;
-    font-weight: 700;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
+  .list .dots { flex: 1 1 auto; min-width: 10px; border-bottom: 1px dotted #bbb; transform: translateY(-4px); }
+  .list .p { flex: 0 0 auto; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; unicode-bidi: plaintext; }
   .list li.hide { display: none; }
 
   .empty { display: none; padding: 28px 14px; text-align: center; color: var(--muted); }
   .empty.show { display: block; }
 
-  .notes {
-    margin: 14px 0 0;
-    padding: 18px 14px 10px;
-    background: #f7f7f7;
-    border-top: 2px solid var(--yellow);
-    font-size: 15px;
-  }
+  .notes { margin: 14px 0 0; padding: 18px 14px 10px; background: #f7f7f7; border-top: 2px solid var(--yellow); font-size: 15px; }
   .notes ol { margin: 0 0 12px; padding-inline-start: 20px; }
   .notes li { margin-bottom: 6px; }
   .notes .slogan { text-align: center; font-weight: 700; margin: 0 0 14px; }
@@ -104,66 +72,74 @@
 
   footer { padding: 14px; text-align: center; font-size: 12px; color: var(--muted); }
 
+  /* ------------- owner mode ------------- */
+  .panel { display: none; padding: 14px; background: #2a2a2a; color: #eee; }
+  .panel.open { display: block; }
+  .panel label { display: block; font-size: 14px; margin-bottom: 6px; }
+  .panel input {
+    width: 100%; padding: 11px 12px; font: inherit; font-size: 16px;
+    border: 1px solid #555; border-radius: 8px; background: #fff; color: #111; margin-bottom: 10px;
+  }
+  .panel .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .panel textarea {
+    width: 100%; padding: 10px; font: inherit; font-size: 14px; line-height: 1.5;
+    border: 1px solid #555; border-radius: 8px; background: #fff; color: #111;
+    margin-bottom: 10px; resize: vertical;
+  }
+  .panel button, #adminBar button {
+    padding: 10px 14px; font: inherit; font-size: 15px; cursor: pointer;
+    border: 0; border-radius: 8px; background: var(--yellow); color: #1b1b1b; font-weight: 700;
+  }
+  .panel button.ghost, #adminBar button.ghost { background: transparent; color: #ddd; border: 1px solid #666; font-weight: 400; }
+  .msg { font-size: 14px; margin-top: 8px; min-height: 1.2em; }
+  .msg.bad { color: #ff9b9b; }
+  .msg.good { color: #9bffb0; }
+
+  #adminBar { display: none; position: sticky; top: 0; z-index: 6; background: #2a2a2a; padding: 10px; gap: 8px; flex-wrap: wrap; }
+  #adminBar.open { display: flex; }
+  #adminBar .grow { flex: 1 1 auto; }
+
+  body.editmode .search { top: var(--barh, 0px); }
+  body.editmode .list li { background: rgba(242,194,48,.07); }
+
+  /* The editable boxes force their own colours. Inheriting them is what made
+     the text vanish in dark mode: light box + inherited near-white text. */
+  body.editmode .list .n,
+  body.editmode .list .p {
+    background: #ffffff;
+    color: #111111;
+    -webkit-text-fill-color: #111111;
+    caret-color: #111111;
+    border: 1px solid #b98f00;
+    border-radius: 6px;
+    padding: 5px 8px;
+    min-width: 3.2em;
+    outline: none;
+    font-weight: 600;
+  }
+  body.editmode .list .n:focus,
+  body.editmode .list .p:focus {
+    border-color: #1b1b1b;
+    box-shadow: 0 0 0 3px rgba(242,194,48,.75);
+  }
+  body.editmode .list .n:empty::before { content: 'ناوی شوێن'; color: #6b6b6b; -webkit-text-fill-color: #6b6b6b; }
+  body.editmode .list .p:empty::before { content: 'نرخ'; color: #6b6b6b; -webkit-text-fill-color: #6b6b6b; }
+  body.editmode .list .dots { border-bottom-color: transparent; }
+  body.editmode .list li ::selection { background: #ffe17a; color: #111; }
+
+  .del {
+    border: 0; background: transparent; color: #c00; cursor: pointer;
+    font-size: 22px; line-height: 1; margin-inline-start: 6px;
+    min-width: 44px; min-height: 44px; padding: 0;      /* thumb-sized, not 20px */
+    touch-action: manipulation; flex: 0 0 auto;
+  }
+
   @media (prefers-color-scheme: dark) {
     :root { --bg: #121212; --ink: #f2f2f2; --line: #333; --muted: #9a9a9a; }
     body { background: var(--bg); color: var(--ink); }
     header { background: #000; }
     .notes { background: #1a1a1a; }
     .list .dots { border-bottom-color: #444; }
-  }
-
-  /* ---- owner edit mode ---- */
-  header { position: relative; }
-  #adminBtn {
-    position: absolute; top: 12px; right: 10px;
-    background: transparent; color: var(--yellow);
-    border: 1px solid var(--yellow); border-radius: 8px;
-    padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer;
-  }
-  #adminBtn:active { background: rgba(242,194,48,.2); }
-
-  .panel { display: none; padding: 14px; background: #2a2a2a; color: #eee; }
-  .panel.open { display: block; }
-  .panel label { display: block; font-size: 14px; margin-bottom: 6px; }
-  .panel input {
-    width: 100%; padding: 11px 12px; font: inherit; font-size: 16px;
-    border: 1px solid #555; border-radius: 8px; background: #fff; color: #111;
-    margin-bottom: 10px;
-  }
-  .panel .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .panel button, #adminBar button {
-    padding: 10px 14px; font: inherit; font-size: 15px; cursor: pointer;
-    border: 0; border-radius: 8px; background: var(--yellow); color: #1b1b1b;
-    font-weight: 700;
-  }
-  .panel button.ghost, #adminBar button.ghost {
-    background: transparent; color: #ddd; border: 1px solid #666; font-weight: 400;
-  }
-  .msg { font-size: 14px; margin-top: 8px; min-height: 1.2em; }
-  .msg.bad { color: #ff9b9b; }
-  .msg.good { color: #9bffb0; }
-  .hint { font-size: 12px; color: #bbb; margin: 0 0 10px; line-height: 1.6; }
-  .hint a { color: var(--yellow); }
-
-  #adminBar {
-    display: none; position: sticky; top: 0; z-index: 6;
-    background: #2a2a2a; padding: 10px; gap: 8px; flex-wrap: wrap;
-  }
-  #adminBar.open { display: flex; }
-  #adminBar .grow { flex: 1 1 auto; }
-
-  body.editmode .search { top: 58px; }
-  body.editmode .list li { background: rgba(242,194,48,.07); }
-  body.editmode .list .n, body.editmode .list .p {
-    border-bottom: 1px dashed #b98f00; padding: 2px 4px; min-width: 2em;
-    outline: none;
-  }
-  body.editmode .list .n:focus, body.editmode .list .p:focus {
-    background: #fff7dd; border-bottom-color: #1b1b1b;
-  }
-  .del {
-    border: 0; background: transparent; color: #c00; cursor: pointer;
-    font-size: 20px; line-height: 1; padding: 0 4px; margin-inline-start: 4px;
   }
 </style>
 </head>
@@ -177,7 +153,7 @@
 
 <div class="panel" id="loginPanel">
   <label for="pw">وشەی نهێنی</label>
-  <input id="pw" type="password" autocomplete="current-password" inputmode="text">
+  <input id="pw" type="password" autocomplete="current-password">
   <div class="row">
     <button type="button" id="loginBtn">چونەژورەوە</button>
     <button type="button" class="ghost" id="loginCancel">پاشگەزبوونەوە</button>
@@ -187,36 +163,30 @@
 
 <div id="adminBar">
   <button type="button" id="addBtn">+ زیادکردنی شوێن</button>
-  <button type="button" id="pubBtn">بڵاوکردنەوە</button>
+  <button type="button" id="sendBtn">ناردنی گۆڕانکاریەکان</button>
   <span class="grow"></span>
   <button type="button" class="ghost" id="dlBtn">داگرتنی فایل</button>
   <button type="button" class="ghost" id="outBtn">دەرچوون</button>
 </div>
 
-<div class="panel" id="tokenPanel">
-  <p class="hint">
-    بۆ بڵاوکردنەوە پێویستە جارێک کلیلی GitHub دابنێیت. لە
-    <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">ئەم لینکە</a>
-    کلیلێک دروست بکە بۆ ڕیپۆی <b>slava-taxi</b> بە مۆڵەتی <b>Contents: Read and write</b>.
-    کلیلەکە تەنها لەسەر ئەم مۆبایلە پاشەکەوت دەبێت.
-  </p>
-  <label for="tok">کلیلی GitHub</label>
-  <input id="tok" type="password" autocomplete="off">
+<div class="panel" id="reportPanel">
+  <label for="reportText">ئەم دەقە کۆپی بکە و بۆ بەلال بینێرە</label>
+  <textarea id="reportText" rows="8" readonly></textarea>
   <div class="row">
-    <button type="button" id="tokSave">پاشەکەوتکردن و بڵاوکردنەوە</button>
-    <button type="button" class="ghost" id="tokCancel">پاشگەزبوونەوە</button>
+    <button type="button" id="reportCopy">کۆپیکردن</button>
+    <button type="button" class="ghost" id="reportClose">داخستن</button>
   </div>
-  <div class="msg" id="pubStatus"></div>
+  <div class="msg" id="reportMsg"></div>
 </div>
-
 
 <div class="search">
   <input id="q" type="search" inputmode="search" autocomplete="off"
+         autocapitalize="off" autocorrect="off" spellcheck="false"
          placeholder="ناوی شوێنەکە بنووسە…" aria-label="گەڕان بۆ شوێن">
   <div class="count" id="count"></div>
 </div>
 
-<ul class="list" id="rows">
+<ul class="list" id="rows" spellcheck="false" autocapitalize="off" autocorrect="off">
   <li><span class="n">بازار / قطعە</span><span class="dots"></span><span class="p">8,000</span></li>
   <li><span class="n">گراج بغداد</span><span class="dots"></span><span class="p">9,000</span></li>
   <li><span class="n">تێرمیناڵ</span><span class="dots"></span><span class="p">6,000</span></li>
@@ -339,36 +309,86 @@
 
 <script>
 (function () {
-  var REPO = 'belal-shahab/slava-taxi', BRANCH = 'main', FILE = 'index.html';
-  var PW = 'Ballen@123';          // gate only — hides the button from customers
-  var TKEY = 'slava_gh_token';    // GitHub token, kept on this device only
+  var PW = 'Ballen@123';
+  var TAPS = 5, TAP_GAP = 3000;
 
   function $(id) { return document.getElementById(id); }
   var list = $('rows'), items = list.getElementsByTagName('li');
   var dirty = false, live = false;
+  var before = new Map(), removed = [];   // reassigned when a draft is restored
 
-  /* ---------- search (works for customers, no login needed) ---------- */
-  function nameOf(li) { return li.getElementsByClassName('n')[0]; }
+  /* A Kurdish keyboard makes "8,000" awkward, and may produce Arabic-Indic
+     digits. Accept anything, normalise to Western digits, add the commas. */
+  function tidyPrice(raw) {
+    var s = (raw || '').replace(/[\u0660-\u0669]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 0x0660 + 48); })
+                       .replace(/[\u06F0-\u06F9]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 0x06F0 + 48); })
+                       .replace(/[^0-9]/g, '');
+    s = s.replace(/^0+(?=\d)/, '');
+    if (!s) return '';
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function nameEl(li) { return li.getElementsByClassName('n')[0]; }
+  function priceEl(li) { return li.getElementsByClassName('p')[0]; }
+  var ZW = /[\u200B-\u200D\u2060\uFEFF]/g;
+  /* zero-width characters sneak in from Arabic keyboards and make a field
+     look empty while still passing a plain trim() */
+  function txt(el) { return (el.textContent || '').replace(ZW, '').trim(); }
+
+  /* Customers type on Arabic keyboards, Kurdish keyboards, and in Latin.
+     Fold both sides so "کرکوک", "كركوك" and "kerkuk"-era spellings all land. */
+  function fold(s) {
+    return (s || '')
+      .replace(/[\u0660-\u0669]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 0x0660 + 48); })
+      .replace(/[\u06F0-\u06F9]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 0x06F0 + 48); })
+      .replace(/[\u064B-\u0652\u0640]/g, '')
+      .replace(ZW, '')
+      .replace(/[\u0623\u0625\u0622\u0671]/g, '\u0627')
+      .replace(/\u0643/g, '\u06A9')
+      .replace(/[\u064A\u0649\u06CE]/g, '\u06CC')
+      .replace(/[\u0629\u0647\u06BE\u06D5]/g, '')
+      .replace(/[\u0624\u06C6]/g, '\u0648')
+      .replace(/\u0695/g, '\u0631')
+      .replace(/\u06B5/g, '\u0644')
+      .replace(/\u06A4/g, '\u0641')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  for (var i0 = 0; i0 < items.length; i0++) {
+    before.set(items[i0], { n: txt(nameEl(items[i0])), p: txt(priceEl(items[i0])) });
+  }
+
+  /* ---------- search: works for customers, no login ---------- */
   function show(n) {
     $('count').textContent = n + ' شوێن';
     $('empty').className = n ? 'empty' : 'empty show';
   }
-  $('q').addEventListener('input', function () {
-    var term = $('q').value.trim(), n = 0;
+  function applyFilter() {
+    var term = fold($('q').value), n = 0;
     for (var i = 0; i < items.length; i++) {
-      var hit = !term || nameOf(items[i]).textContent.indexOf(term) !== -1;
-      items[i].className = hit ? '' : 'hide';
+      var hit = !term || fold(nameEl(items[i]).textContent).indexOf(term) !== -1;
+      if (hit) items[i].classList.remove('hide'); else items[i].classList.add('hide');
+      if (items[i].getAttribute('class') === '') items[i].removeAttribute('class');
       if (hit) n++;
     }
     show(n);
-  });
-  show(items.length);
+  }
+  $('q').addEventListener('input', applyFilter);
+  applyFilter();
 
-  /* ---------- login ---------- */
+  /* ---------- hidden gate: five taps on سلاڤا ---------- */
+  var taps = 0, lastTap = 0;
   $('adminBtn').addEventListener('click', function () {
-    if (live) { $('adminBar').classList.toggle('open'); return; }
-    $('loginPanel').classList.toggle('open');
-    if ($('loginPanel').classList.contains('open')) $('pw').focus();
+    if (live) { $('adminBar').classList.toggle('open'); syncBar(); return; }
+    var now = new Date().getTime();
+    taps = (now - lastTap > TAP_GAP) ? 1 : taps + 1;
+    lastTap = now;
+    if (taps < TAPS) return;                 // stay silent so customers never find it
+    taps = 0;
+    $('loginPanel').classList.add('open');
+    $('pw').focus();
   });
   $('loginCancel').addEventListener('click', function () {
     $('loginPanel').classList.remove('open'); $('pw').value = ''; $('loginErr').textContent = '';
@@ -388,42 +408,77 @@
 
   /* ---------- edit mode ---------- */
   function decorate(li) {
-    nameOf(li).setAttribute('contenteditable', 'true');
-    li.getElementsByClassName('p')[0].setAttribute('contenteditable', 'true');
+    nameEl(li).setAttribute('contenteditable', 'true');
+    priceEl(li).setAttribute('contenteditable', 'true');
     if (!li.getElementsByClassName('del')[0]) {
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'del'; b.textContent = '×';
       b.addEventListener('click', function () {
-        if (confirm('ئەم شوێنە بسڕدرێتەوە؟\n' + nameOf(li).textContent)) {
-          li.remove(); dirty = true; show(items.length);
-        }
+        if (!confirm('ئەم شوێنە بسڕدرێتەوە؟\n' + txt(nameEl(li)))) return;
+        if (before.has(li)) removed.push(before.get(li));
+        li.remove(); dirty = true; queueDraft(); applyFilter();
       });
       li.appendChild(b);
     }
   }
+  /* The bar wraps to two rows on every phone, so its height cannot be
+     hardcoded — measure it and let the sticky search box sit below it. */
+  function syncBar() {
+    var bar = $('adminBar');
+    var h = (live && bar.classList.contains('open')) ? bar.getBoundingClientRect().height : 0;
+    document.body.style.setProperty('--barh', Math.round(h) + 'px');
+  }
+  window.addEventListener('resize', syncBar);
+  window.addEventListener('orientationchange', syncBar);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncBar);
+
   function enter() {
     live = true;
     document.body.classList.add('editmode');
     $('adminBar').classList.add('open');
     for (var i = 0; i < items.length; i++) decorate(items[i]);
+    restoreDraft();
+    syncBar();
   }
   function leave() {
     live = false;
     document.body.classList.remove('editmode');
     $('adminBar').classList.remove('open');
-    $('tokenPanel').classList.remove('open');
-    var els = list.querySelectorAll('[contenteditable]');
-    for (var i = 0; i < els.length; i++) els[i].removeAttribute('contenteditable');
-    var dels = list.querySelectorAll('.del');
-    for (var j = 0; j < dels.length; j++) dels[j].remove();
+    var e1 = list.querySelectorAll('[contenteditable]');
+    for (var i = 0; i < e1.length; i++) e1[i].removeAttribute('contenteditable');
+    var e2 = list.querySelectorAll('.del');
+    for (var j = 0; j < e2.length; j++) e2[j].remove();
+    document.body.removeAttribute('style');
   }
   $('outBtn').addEventListener('click', function () {
-    if (dirty && !confirm('گۆڕانکاری بڵاو نەکراوە هەیە. دەرچیت؟')) return;
-    dirty = false; leave();
+    if (dirty && !confirm('گۆڕانکاری هەیە کە نەنێردراوە. دەرچیت؟')) return;
+    dirty = false; dropDraft(); leave();
   });
 
-  list.addEventListener('input', function () { dirty = true; });
-  /* keep pasted text plain so the saved file stays clean */
+  /* keep the markup clean: no stray <br>, no pasted styling */
+  list.addEventListener('input', function (e) {
+    dirty = true; queueDraft();
+    var el = e.target;
+    if (el && el.getAttribute && el.getAttribute('contenteditable') === 'true') {
+      if (!txt(el)) el.innerHTML = '';       // lets the :empty placeholder show
+    }
+  });
+  list.addEventListener('focusout', function (e) {
+    var el = e.target;
+    if (!el || !el.classList) return;
+    if (el.classList.contains('p')) {
+      var was = txt(el), t = tidyPrice(el.textContent);
+      /* compare against the RAW text: "  6,000  " tidies to the same trimmed
+         value, but the stray spaces still have to be written out */
+      if (el.textContent !== t) el.textContent = t;
+      if (t !== was) dirty = true;
+      if (!t) el.innerHTML = '';
+    } else if (el.classList.contains('n')) {
+      var v = txt(el);
+      if (v !== el.textContent) el.textContent = v;
+      if (!v) el.innerHTML = '';
+    }
+  });
   list.addEventListener('paste', function (e) {
     if (!live) return;
     e.preventDefault();
@@ -434,25 +489,130 @@
   $('addBtn').addEventListener('click', function () {
     var li = document.createElement('li');
     li.innerHTML = '<span class="n"></span><span class="dots"></span><span class="p"></span>';
-    nameOf(li).textContent = 'ناوی نوێ';
-    li.getElementsByClassName('p')[0].textContent = '0,000';
     list.appendChild(li);
     decorate(li);
-    dirty = true; show(items.length);
+    dirty = true; queueDraft(); applyFilter();
     if (li.scrollIntoView) li.scrollIntoView({ block: 'center' });
-    nameOf(li).focus();
-    var sel = document.getSelection();
-    if (sel && sel.selectAllChildren) sel.selectAllChildren(nameOf(li));
+    nameEl(li).focus();                      // empty, so the placeholder guides him
   });
 
+  /* The whole flow sends him to WhatsApp or Files, and phones discard
+     background tabs. A discard is not a navigation, so beforeunload never
+     fires — persist a draft instead of trusting it. */
+  var DKEY = 'slava-draft';
+  function snapshot() {
+    var a = [];
+    for (var i = 0; i < items.length; i++) a.push({ n: txt(nameEl(items[i])), p: txt(priceEl(items[i])) });
+    return a;
+  }
+  function saveDraft() {
+    if (!live || !dirty) return;
+    try { localStorage.setItem(DKEY, JSON.stringify({ rows: snapshot(), removed: removed })); } catch (err) {}
+  }
+  function dropDraft() { try { localStorage.removeItem(DKEY); } catch (err) {} }
+  function restoreDraft() {
+    var raw;
+    try { raw = localStorage.getItem(DKEY); } catch (err) { return; }
+    if (!raw) return;
+    var d;
+    try { d = JSON.parse(raw); } catch (err) { dropDraft(); return; }
+    if (!d || !d.rows || !d.rows.length) { dropDraft(); return; }
+    if (JSON.stringify(d.rows) === JSON.stringify(snapshot())) { dropDraft(); return; }
+    if (!confirm('گۆڕانکاری پاشەکەوتکراو هەیە. بیگەڕێنمەوە؟')) { dropDraft(); return; }
+    while (list.firstChild) list.removeChild(list.firstChild);
+    before = new Map();
+    for (var i = 0; i < d.rows.length; i++) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="n"></span><span class="dots"></span><span class="p"></span>';
+      nameEl(li).textContent = d.rows[i].n;
+      priceEl(li).textContent = d.rows[i].p;
+      list.appendChild(li);
+      decorate(li);
+    }
+    removed = d.removed || [];
+    dirty = true;
+    applyFilter();
+  }
+  var dt = null;
+  function queueDraft() { if (dt) clearTimeout(dt); dt = setTimeout(saveDraft, 400); }
+  window.addEventListener('pagehide', saveDraft);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) saveDraft(); });
   window.addEventListener('beforeunload', function (e) {
+    saveDraft();
     if (dirty) { e.preventDefault(); e.returnValue = ''; }
   });
 
-  /* ---------- build the file to publish ---------- */
+  /* ---------- checks before handing anything over ---------- */
+  function firstBlank() {
+    for (var i = 0; i < items.length; i++) {
+      if (!txt(nameEl(items[i]))) return nameEl(items[i]);
+      if (!txt(priceEl(items[i]))) return priceEl(items[i]);
+    }
+    return null;
+  }
+  function blocked() {
+    var bad = firstBlank();
+    if (!bad) return false;
+    alert('خانەیەک بەتاڵە. پڕی بکەرەوە.');
+    if (bad.scrollIntoView) bad.scrollIntoView({ block: 'center' });
+    bad.focus();
+    return true;
+  }
+
+  /* ---------- what changed ---------- */
+  var RLM = '\u200F';   // stops a Latin fragment in the name flipping the numbers
+  function changes() {
+    var priced = [], renamed = [], added = [];
+    for (var i = 0; i < items.length; i++) {
+      var li = items[i], n = txt(nameEl(li)), p = txt(priceEl(li));
+      if (before.has(li)) {
+        var o = before.get(li);
+        if (o.n !== n) renamed.push(RLM + o.n + ' ← ' + RLM + n);
+        if (o.p !== p) priced.push(n + ': ' + RLM + o.p + ' ← ' + RLM + p);
+      } else {
+        added.push(n + ' — ' + RLM + p);
+      }
+    }
+    return { priced: priced, renamed: renamed, added: added, removed: removed };
+  }
+  function report() {
+    var c = changes(), out = [];
+    if (c.priced.length) out.push('نرخ گۆڕدرا:\n• ' + c.priced.join('\n• '));
+    if (c.renamed.length) out.push('ناو گۆڕدرا:\n• ' + c.renamed.join('\n• '));
+    if (c.added.length) out.push('زیادکرا:\n• ' + c.added.join('\n• '));
+    if (c.removed.length) out.push('سڕدرایەوە:\n• ' + c.removed.map(function (r) { return r.n + ' (' + RLM + r.p + ')'; }).join('\n• '));
+    return out.length ? 'گۆڕانکاری لە نرخەکانی تەکسی سلاڤا:\n\n' + out.join('\n\n') : '';
+  }
+  $('sendBtn').addEventListener('click', function () {
+    if (blocked()) return;
+    var msg = report();
+    if (!msg) { alert('هیچ گۆڕانکاریەک نییە.'); return; }
+    var win = window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    if (!win) {                       // popup blocked — fall back to copy
+      var ta = $('reportText');
+      ta.value = msg;
+      $('reportPanel').classList.add('open');
+      ta.focus(); ta.select();
+    }
+  });
+
+  $('reportClose').addEventListener('click', function () {
+    $('reportPanel').classList.remove('open'); $('reportMsg').textContent = '';
+  });
+  $('reportCopy').addEventListener('click', function () {
+    var ta = $('reportText');
+    ta.focus(); ta.select();
+    var done = false;
+    try { done = document.execCommand('copy'); } catch (err) { done = false; }
+    $('reportMsg').className = done ? 'msg good' : 'msg bad';
+    $('reportMsg').textContent = done ? 'کۆپی کرا ✓' : 'بە دەست کۆپی بکە';
+  });
+
+  /* ---------- the whole page, cleaned, as a file ---------- */
   function buildFile() {
-    var c = document.documentElement.cloneNode(true);
-    var i, els;
+    var c = document.documentElement.cloneNode(true), els, i;
+    els = c.querySelectorAll('.n, .p');
+    for (i = 0; i < els.length; i++) els[i].textContent = (els[i].textContent || '').trim();
     els = c.querySelectorAll('[contenteditable]');
     for (i = 0; i < els.length; i++) els[i].removeAttribute('contenteditable');
     els = c.querySelectorAll('.del');
@@ -462,84 +622,25 @@
     els = c.querySelectorAll('.panel.open, #adminBar.open');
     for (i = 0; i < els.length; i++) els[i].classList.remove('open');
     c.querySelector('body').classList.remove('editmode');
+    c.querySelector('body').removeAttribute('style');
+    /* last, so classes emptied by the steps above are swept too */
+    els = c.querySelectorAll('[class=""]');
+    for (i = 0; i < els.length; i++) els[i].removeAttribute('class');
     var n;
     if ((n = c.querySelector('#loginErr'))) n.textContent = '';
-    if ((n = c.querySelector('#pubStatus'))) n.textContent = '';
+    if ((n = c.querySelector('#reportMsg'))) n.textContent = '';
+    if ((n = c.querySelector('#reportText'))) { n.textContent = ''; n.value = ''; }
     if ((n = c.querySelector('#count'))) n.textContent = '';
     if ((n = c.querySelector('#empty'))) n.className = 'empty';
     return '<!doctype html>\n' + c.outerHTML + '\n';
   }
-
   $('dlBtn').addEventListener('click', function () {
+    if (blocked()) return;
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([buildFile()], { type: 'text/html' }));
     a.download = 'index.html';
     a.click();
     URL.revokeObjectURL(a.href);
-  });
-
-  /* ---------- publish straight to GitHub ---------- */
-  function b64(str) {
-    var bytes = new TextEncoder().encode(str), bin = '';
-    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-    return btoa(bin);
-  }
-  function status(txt, cls) {
-    var el = $('pubStatus');
-    el.className = 'msg' + (cls ? ' ' + cls : '');
-    el.textContent = txt;
-  }
-  function api(path, opts, token) {
-    opts = opts || {};
-    opts.headers = Object.assign({
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28'
-    }, opts.headers || {});
-    return fetch('https://api.github.com/repos/' + REPO + '/contents/' + path, opts);
-  }
-  function publish(token) {
-    $('tokenPanel').classList.add('open');
-    status('چاوەڕێ بکە…');
-    var body = buildFile();
-    api(FILE + '?ref=' + BRANCH, {}, token).then(function (r) {
-      if (r.status === 401) throw new Error('کلیلەکە هەڵەیە یان بەسەرچووە');
-      if (!r.ok) throw new Error('نەتوانرا فایلەکە بخوێنرێتەوە (' + r.status + ')');
-      return r.json();
-    }).then(function (info) {
-      return api(FILE, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: 'نوێکردنەوەی نرخەکان',
-          content: b64(body),
-          sha: info.sha,
-          branch: BRANCH
-        })
-      }, token);
-    }).then(function (r) {
-      if (!r.ok) return r.json().then(function (j) {
-        throw new Error(j.message || ('هەڵە ' + r.status));
-      });
-      dirty = false;
-      localStorage.setItem(TKEY, token);
-      status('بڵاوکرایەوە ✓ دوای ١ خولەک لەسەر کارتەکان دەردەکەوێت', 'good');
-    }).catch(function (e) {
-      status(e.message, 'bad');
-    });
-  }
-  $('pubBtn').addEventListener('click', function () {
-    var t = localStorage.getItem(TKEY);
-    if (t) { publish(t); } else { $('tokenPanel').classList.add('open'); $('tok').focus(); }
-  });
-  $('tokSave').addEventListener('click', function () {
-    var t = $('tok').value.trim();
-    if (!t) { status('کلیل بنووسە', 'bad'); return; }
-    $('tok').value = '';
-    publish(t);
-  });
-  $('tokCancel').addEventListener('click', function () {
-    $('tokenPanel').classList.remove('open'); $('tok').value = ''; status('');
   });
 })();
 </script>
