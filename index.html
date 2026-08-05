@@ -2,53 +2,275 @@
 <html lang="ckb" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=6">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1b1b1b">
 <title>نرخەکانی تەکسی شاری سلاڤا</title>
-<meta name="description" content="لیستی نرخەکانی تەکسی شاری سلاڤا">
+<meta name="description" content="لیستی نرخەکانی تەکسی شاری سلاڤا — هەولێر">
 <style>
-  :root { color-scheme: light; }
-  * { box-sizing: border-box; }
+  :root {
+    --yellow: #f2c230;
+    --ink: #1b1b1b;
+    --line: #cfcfcf;
+    --muted: #6b6b6b;
+    --bg: #ffffff;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    background: #f2c230;
-    font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Naskh Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.4;
   }
+
   header {
-    width: 100%;
-    padding: 14px 12px;
+    background: var(--ink);
+    color: var(--yellow);
+    padding: 16px 14px 14px;
     text-align: center;
-    background: #1b1b1b;
-    color: #f2c230;
-    font-size: 20px;
-    font-weight: 700;
   }
-  main { width: 100%; padding: 10px; }
-  img {
-    display: block;
+  header h1 { margin: 0; font-size: 21px; font-weight: 700; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #c9c9c9; }
+
+  .search {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--yellow);
+    padding: 10px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .search input {
     width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
+    padding: 11px 14px;
+    font: inherit;
+    font-size: 17px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    color: #1b1b1b;
   }
-  p.hint {
-    margin: 10px auto 24px;
-    text-align: center;
-    font-size: 14px;
-    color: #4a3a00;
+  .count { margin: 6px 2px 0; font-size: 12px; color: #5a4600; }
+
+  /* fare grid — flows DOWN each column, same as the printed card */
+  .list {
+    margin: 0;
+    padding: 0 8px;
+    list-style: none;
+    column-width: 210px;
+    column-gap: 14px;
+    column-rule: 1px solid var(--line);
+  }
+  .list li {
+    break-inside: avoid;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 9px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .list .n { flex: 0 1 auto; }
+  .list .dots {
+    flex: 1 1 auto;
+    min-width: 10px;
+    border-bottom: 1px dotted #bbb;
+    transform: translateY(-4px);
+  }
+  .list .p {
+    flex: 0 0 auto;
+    font-weight: 700;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .list li.hide { display: none; }
+
+  .empty { display: none; padding: 28px 14px; text-align: center; color: var(--muted); }
+  .empty.show { display: block; }
+
+  .notes {
+    margin: 14px 0 0;
+    padding: 18px 14px 10px;
+    background: #f7f7f7;
+    border-top: 2px solid var(--yellow);
+    font-size: 15px;
+  }
+  .notes ol { margin: 0 0 12px; padding-inline-start: 20px; }
+  .notes li { margin-bottom: 6px; }
+  .notes .slogan { text-align: center; font-weight: 700; margin: 0 0 14px; }
+  .notes .ckb { text-align: center; font-weight: 700; margin: 0 0 4px; }
+  .notes .ckb + p { text-align: center; margin: 0 0 12px; }
+
+  footer { padding: 14px; text-align: center; font-size: 12px; color: var(--muted); }
+
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121212; --ink: #f2f2f2; --line: #333; --muted: #9a9a9a; }
+    body { background: var(--bg); color: var(--ink); }
+    header { background: #000; }
+    .notes { background: #1a1a1a; }
+    .list .dots { border-bottom-color: #444; }
   }
 </style>
 </head>
 <body>
-  <header>نرخەکانی تەکسی شاری سلاڤا</header>
-  <main>
-    <img src="prices.jpg" alt="لیستی نرخەکانی تەکسی شاری سلاڤا">
-    <p class="hint">بۆ گەورەکردن، بە دوو پەنجە زووم بکە</p>
-  </main>
+
+<header>
+  <h1>نرخەکانی تەکسی شاری سلاڤا</h1>
+  <p>بۆ گواستنەوەی هاوڵاتیان — هەولێر</p>
+</header>
+
+<div class="search">
+  <input id="q" type="search" inputmode="search" autocomplete="off"
+         placeholder="ناوی شوێنەکە بنووسە…" aria-label="گەڕان بۆ شوێن">
+  <div class="count" id="count"></div>
+</div>
+
+<ul class="list" id="rows">
+  <li><span class="n">بازار / قطعە</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">گراج بغداد</span><span class="dots"></span><span class="p">9,000</span></li>
+  <li><span class="n">تێرمیناڵ</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">کەسنەزان</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">عی للشرطە</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">مطعەم یاسین</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">مطعەم صەمەد</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">مطعەم ابوشهاب</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">مطعەم طبیخ</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">سەنتەری دڵ</span><span class="dots"></span><span class="p">9,000</span></li>
+  <li><span class="n">نەخۆشخانەی هەولێری تایبەت</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">نەخۆشخانەی بلسم</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">نەخۆشخانەی سەردەم</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">نەخۆشخانەی پار</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">نەخۆشخانەی دایک</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">نەخۆشخانەی cmc</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">نەخۆشخانەی ڕۆژئاوا</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">نەخۆشخانەی ولادە</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">نەخۆشخانەی جمهوری</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">هەرشەم دوو</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">وتێل کریستال</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">هەرشەم ٢ و ٣</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">هیوا ستی</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">هەولێری نوێ</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">عەدالە</span><span class="dots"></span><span class="p">9,000</span></li>
+  <li><span class="n">قوشتەپە</span><span class="dots"></span><span class="p">20,000</span></li>
+  <li><span class="n">فیوچەر ستی</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">کوردستان ستی</span><span class="dots"></span><span class="p">4,000</span></li>
+  <li><span class="n">گەنجان ستی</span><span class="dots"></span><span class="p">4,000</span></li>
+  <li><span class="n">ئازادی نوێ</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">زین ستی</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">کولان ستی</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">پارل ڤیو</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">دریم ستی</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">ئاشتی دوو</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">لانە ستی</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">ئیتالی دوو</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">ئیتالی یەک</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">بانک ستی</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">زیرین</span><span class="dots"></span><span class="p">4,000</span></li>
+  <li><span class="n">دەروازەی هەولێر</span><span class="dots"></span><span class="p">4,000</span></li>
+  <li><span class="n">شارەوانی</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">گوندی کۆری</span><span class="dots"></span><span class="p">3,000</span></li>
+  <li><span class="n">پێشەنگ تاوەر</span><span class="dots"></span><span class="p">3,000</span></li>
+  <li><span class="n">عەنکاوە</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">١٠٨ عەنکاوە</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">گوندی لوبنانی</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">بیابان</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">٢ سایدی لاوان</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">ڕۆیاڵ مۆڵ</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">مەسیف</span><span class="dots"></span><span class="p">15,000</span></li>
+  <li><span class="n">موصل</span><span class="dots"></span><span class="p">50,000</span></li>
+  <li><span class="n">شۆرش</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">تەوراوە</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">فارما ٤٠م</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">٣٢ پارک</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">دۆلاراوە</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">نازناز</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">لەنگە</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">هەڤالان</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">ئەسکان</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">ئازادی</span><span class="dots"></span><span class="p">9,000</span></li>
+  <li><span class="n">زانکۆی سلاحەدین</span><span class="dots"></span><span class="p">9,000</span></li>
+  <li><span class="n">لوبنانی فەرەنسی</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">زانکۆی جیهان</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">زانکۆی ئیشق</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">نیوستی</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">ماجدی مۆڵ</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">فلکەی زراعە</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">فەرمانبەران</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">مامزاوە</span><span class="dots"></span><span class="p">10,000</span></li>
+  <li><span class="n">ئاشتی یەک</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">گوندی ئارام</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">ئەندازیاران</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">گلۆباڵ ستی</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">مامۆستایان</span><span class="dots"></span><span class="p">3,000</span></li>
+  <li><span class="n">شەقڵاوە</span><span class="dots"></span><span class="p">25,000</span></li>
+  <li><span class="n">سلێمانی</span><span class="dots"></span><span class="p">75,000</span></li>
+  <li><span class="n">١٨ شوبات</span><span class="dots"></span><span class="p">4,000</span></li>
+  <li><span class="n">٥ حەسارۆک</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">کورانی عەنکاوە</span><span class="dots"></span><span class="p">6,000</span></li>
+  <li><span class="n">شاوەیس</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">پەرزین</span><span class="dots"></span><span class="p">4,000</span></li>
+  <li><span class="n">سێتاقان</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">دارەتو</span><span class="dots"></span><span class="p">10,000</span></li>
+  <li><span class="n">ئیمپایەر</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">گوندی ئینگلیزی</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">پارکی سامی</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">دوکانی گەشتیاری</span><span class="dots"></span><span class="p">55,000</span></li>
+  <li><span class="n">شاری زیتون</span><span class="dots"></span><span class="p">10,000</span></li>
+  <li><span class="n">صناعەی شیمالی</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">صناعەی جنوب</span><span class="dots"></span><span class="p">9,000</span></li>
+  <li><span class="n">معرەز</span><span class="dots"></span><span class="p">9,000</span></li>
+  <li><span class="n">بەختیاری</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">مناره</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">نەخۆشخانەی ڕەسول</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">نەخۆشخانەی ڕزگاری</span><span class="dots"></span><span class="p">7,000</span></li>
+  <li><span class="n">سەنتەری میدیا</span><span class="dots"></span><span class="p">8,000</span></li>
+  <li><span class="n">هەرشەم یەك</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">کورانی نوێ</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">شاهان ستی</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">بەحرکە</span><span class="dots"></span><span class="p">5,000</span></li>
+  <li><span class="n">کەرکوک</span><span class="dots"></span><span class="p">50,000</span></li>
+  <li><span class="n">دهۆک</span><span class="dots"></span><span class="p">65,000</span></li>
+</ul>
+
+<p class="empty" id="empty">هیچ شوێنێک نەدۆزرایەوە</p>
+
+<div class="notes">
+  <ol dir="rtl">
+    <li>انتم بي أمان ويانا تكسي سلاڤا كلها معتريمن مسأوليات علينا</li>
+    <li>وة اذا نسيت اغراضكم بل سيارة نحن نرجعكم بسهولة.</li>
+  </ol>
+  <p class="slogan">تسكي سلاڤا ستي أمانة و سلامة</p>
+  <p class="ckb">لەگەڵ تەکسی سلاڤا پارێزراوی</p>
+  <p>ئێمە بەرپرسین لە ونبونی هەر شتێک خۆمان بۆت دەگەڕێنینەوە</p>
+</div>
+
+<footer>تەکسی شاری سلاڤا</footer>
+
+<script>
+  var q = document.getElementById('q');
+  var items = document.getElementById('rows').getElementsByTagName('li');
+  var count = document.getElementById('count');
+  var empty = document.getElementById('empty');
+
+  function show(n) {
+    count.textContent = n + ' شوێن';
+    empty.className = n ? 'empty' : 'empty show';
+  }
+
+  q.addEventListener('input', function () {
+    var term = q.value.trim();
+    var n = 0;
+    for (var i = 0; i < items.length; i++) {
+      var hit = !term || items[i].firstChild.textContent.indexOf(term) !== -1;
+      items[i].className = hit ? '' : 'hide';
+      if (hit) n++;
+    }
+    show(n);
+  });
+
+  show(items.length);
+</script>
+
 </body>
 </html>
